@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון השקעות עם ריבית דריבית</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 200px;
+        }
+        form {
+            display: grid;
+            gap: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .note {
+            margin-top: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="https://mosheeliyahu.co.il/wp-content/uploads/2023/03/cropped-לוגו-שקוף-פיננסי.png" alt="לוגו משה אליהו">
+    </div>
+    <h1>מחשבון השקעות עם ריבית דריבית</h1>
+    <form id="investmentForm">
+        <label for="initialInvestment">סכום השקעה התחלתי:</label>
+        <input type="number" id="initialInvestment" required>
+
+        <label for="years">תקופת השקעה (בשנים):</label>
+        <input type="number" id="years" required>
+
+        <label for="monthlyDeposit">הפקדה חודשית:</label>
+        <input type="number" id="monthlyDeposit" required>
+
+        <label for="riskLevel">רמת סיכון:</label>
+        <select id="riskLevel">
+            <option value="0.03">נמוכה (3%)</option>
+            <option value="0.04">בינונית (4%)</option>
+            <option value="0.08">גבוהה (8%)</option>
+            <option value="custom">בחירה ידנית</option>
+        </select>
+
+        <div id="customRiskDiv" style="display: none;">
+            <label for="customRisk">רמת סיכון מותאמת (%):</label>
+            <input type="number" id="customRisk" step="0.1" min="0" max="100">
+        </div>
+
+        <label for="desiredReturn">תשואה רצויה (%):</label>
+        <input type="number" id="desiredReturn" step="0.1">
+
+        <label for="desiredAmount">סכום צבירה רצוי:</label>
+        <input type="number" id="desiredAmount">
+
+        <button type="submit">חשב</button>
+    </form>
+
+    <div id="result" class="result"></div>
+
+    <p class="note">
+        <strong>הערה חשובה:</strong> המחשבון נועד לספק הערכה בלבד ואינו מהווה ייעוץ פיננסי מקצועי. התשואות המחושבות מבוססות על הנחות ותחזיות שאינן מובטחות, והביצועים בפועל עשויים להשתנות. יש לקחת בחשבון גורמים נוספים כמו שינויים בשוק, מיסים ודמי ניהול.
+    </p>
+
+    <script>
+        const riskLevelSelect = document.getElementById('riskLevel');
+        const customRiskDiv = document.getElementById('customRiskDiv');
+        const customRiskInput = document.getElementById('customRisk');
+
+        riskLevelSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRiskDiv.style.display = 'block';
+            } else {
+                customRiskDiv.style.display = 'none';
+            }
+        });
+
+        document.getElementById('investmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const initialInvestment = parseFloat(document.getElementById('initialInvestment').value);
+            const years = parseInt(document.getElementById('years').value);
+            const monthlyDeposit = parseFloat(document.getElementById('monthlyDeposit').value);
+            
+            let riskLevel;
+            if (riskLevelSelect.value === 'custom') {
+                riskLevel = parseFloat(customRiskInput.value) / 100;
+            } else {
+                riskLevel = parseFloat(riskLevelSelect.value);
+            }
+
+            const desiredReturn = parseFloat(document.getElementById('desiredReturn').value) / 100 || riskLevel;
+            const desiredAmount = parseFloat(document.getElementById('desiredAmount').value);
+
+            const monthlyRate = desiredReturn / 12;
+            const months = years * 12;
+
+            let finalAmount = initialInvestment * Math.pow(1 + monthlyRate, months);
+            for (let i = 0; i < months; i++) {
+                finalAmount += monthlyDeposit * Math.pow(1 + monthlyRate, months - i);
+            }
+
+            let requiredMonthlyDeposit = 0;
+            if (desiredAmount) {
+                requiredMonthlyDeposit = (desiredAmount - initialInvestment * Math.pow(1 + monthlyRate, months)) /
+                    ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <p>סכום צבירה סופי: ${finalAmount.toFixed(2)} ש"ח</p>
+                ${desiredAmount ? `<p>הפקדה חודשית נדרשת: ${requiredMonthlyDeposit.toFixed(2)} ש"ח</p>` : ''}
+            `;
+        });
+    </script>
+</body>
+</html>
